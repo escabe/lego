@@ -149,6 +149,7 @@ func allDNSCodes() string {
 		"vegadns",
 		"vercel",
 		"versio",
+		"vimexx",
 		"vinyldns",
 		"vkcloud",
 		"volcengine",
@@ -3097,6 +3098,31 @@ func displayDNSHelp(w io.Writer, name string) error {
 
 		ew.writeln()
 		ew.writeln(`More information: https://go-acme.github.io/lego/dns/versio`)
+
+	case "vimexx":
+		// generated from: providers/dns/vimexx/vimexx.toml
+		ew.writeln(`Configuration for vimexx.nl.`)
+		ew.writeln(`Code:	'vimexx'`)
+		ew.writeln(`Since:	'v4.11.0'`)
+		ew.writeln()
+
+		ew.writeln(`Credentials:`)
+		ew.writeln(`	- "VIMEXX_CLIENT_ID":	Vimexx client id`)
+		ew.writeln(`	- "VIMEXX_CLIENT_SECRET":	Vimexx client secret`)
+		ew.writeln(`	- "VIMEXX_ENDPOINT":	Base API (ex: /api/v1 or /apitest/v1)`)
+		ew.writeln(`	- "VIMEXX_PASSWORD":	Vimexx password`)
+		ew.writeln(`	- "VIMEXX_SERVER_BASE_URL":	Base URL of the server (ex: https://api.vimexx.nl)`)
+		ew.writeln(`	- "VIMEXX_USERNAME":	Vimexx username (e-mail)`)
+		ew.writeln()
+
+		ew.writeln(`Additional Configuration:`)
+		ew.writeln(`	- "VIMEXX_HTTP_TIMEOUT":	API request timeout in seconds (Default: 30)`)
+		ew.writeln(`	- "VIMEXX_POLLING_INTERVAL":	Time between DNS propagation check in seconds (Default: 2)`)
+		ew.writeln(`	- "VIMEXX_PROPAGATION_TIMEOUT":	Maximum waiting time for DNS propagation in seconds (Default: 60)`)
+		ew.writeln(`	- "VIMEXX_TTL":	The TTL of the TXT record used for the DNS challenge in seconds (Default: 300)`)
+
+		ew.writeln()
+		ew.writeln(`More information: https://go-acme.github.io/lego/dns/vimexx`)
 
 	case "vinyldns":
 		// generated from: providers/dns/vinyldns/vinyldns.toml
