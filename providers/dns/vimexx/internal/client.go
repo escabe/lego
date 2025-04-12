@@ -50,7 +50,10 @@ func (v *Vimexx) Login() {
 	body.Set("username", v.username)
 	body.Set("password", v.password)
 	body.Set("scope", "whmcs-access")
-	res, err := http.PostForm(v.apiUrl+"/auth/token", body)
+
+	req, _ := http.NewRequest("POST", v.apiUrl+"/auth/token", strings.NewReader(body.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	res, err := v.HTTPClient.Do(req)
 	if err != nil {
 		panic(err)
 	}
@@ -59,10 +62,10 @@ func (v *Vimexx) Login() {
 	if err != nil {
 		panic(err)
 	}
-	f, _ := os.Create("token.json")
-	j, _ := json.Marshal(v.accessToken)
-	f.Write(j)
-	f.Close()
+	//f, _ := os.Create("token.json")
+	//j, _ := json.Marshal(v.accessToken)
+	//f.Write(j)
+	//f.Close()
 
 }
 
@@ -103,8 +106,7 @@ func (v Vimexx) GetDNS(domain string) []DNSRecord {
 	req.Header.Add("Authorization", "Bearer "+v.accessToken.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
 
-	c := &http.Client{}
-	res, err := c.Do(req)
+	res, err := v.HTTPClient.Do(req)
 
 	if err != nil {
 		panic(err)
@@ -140,8 +142,7 @@ func (v Vimexx) SetDNS(domain string, records []DNSRecord) {
 	req.Header.Add("Authorization", "Bearer "+v.accessToken.AccessToken)
 	req.Header.Add("Content-Type", "application/json")
 
-	c := &http.Client{}
-	res, err := c.Do(req)
+	res, err := v.HTTPClient.Do(req)
 
 	if err != nil {
 		panic(err)

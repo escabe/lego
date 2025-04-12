@@ -103,11 +103,12 @@ func NewDNSProviderConfig(config *Config) (*DNSProvider, error) {
 	}
 
 	client := internal.NewClient(config.ClientId, config.ClientSecret, config.Username, config.Password, config.baseURL, config.Endpoint)
-	client.Login()
 
 	if config.HTTPClient != nil {
 		client.HTTPClient = config.HTTPClient
 	}
+
+	client.Login()
 
 	return &DNSProvider{
 		config:          config,
