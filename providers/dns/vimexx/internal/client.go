@@ -62,10 +62,6 @@ func (v *Vimexx) Login() {
 	if err != nil {
 		panic(err)
 	}
-	//f, _ := os.Create("token.json")
-	//j, _ := json.Marshal(v.accessToken)
-	//f.Write(j)
-	//f.Close()
 
 }
 
@@ -92,7 +88,7 @@ type DNSResponse struct {
 	Data    DNSData `json:"data"`
 }
 
-func (v Vimexx) GetDNS(domain string) []DNSRecord {
+func (v Vimexx) GetDNSRecords(domain string) []DNSRecord {
 	parts := strings.Split(domain, ".")
 	j, _ := json.Marshal(map[string]any{
 		"body": map[string]string{
@@ -120,20 +116,18 @@ func (v Vimexx) GetDNS(domain string) []DNSRecord {
 	return response.Data.DNSRecords
 }
 
-func (v Vimexx) SetDNS(domain string, records []DNSRecord) {
+func (v Vimexx) SetDNSRecords(domain string, records []DNSRecord) {
 	parts := strings.Split(domain, ".")
-	rr := records[:0]
-	for _, record := range records {
-		if record.TTL == 0 {
-			record.TTL = TTL
+	for i := range records {
+		if records[i].TTL == 0 {
+			records[i].TTL = TTL
 		}
-		rr = append(rr, record)
 	}
 	j, _ := json.Marshal(map[string]any{
 		"body": map[string]any{
 			"sld":         parts[0],
 			"tld":         parts[1],
-			"dns_records": rr,
+			"dns_records": records,
 		},
 		"version": "8.6.0-release.1",
 	})
@@ -153,4 +147,34 @@ func (v Vimexx) SetDNS(domain string, records []DNSRecord) {
 	if !response.Result {
 		panic("Failed Setting DNS Records")
 	}
+}
+
+func (v Vimexx) SetDNSRecord(domain string, r DNSRecord) {
+	// Get the current records
+	cr := v.GetDNSRecords(domain)
+	// Copy all records which are not equal to the new one
+	rr := []DNSRecord{}
+	for _, record := range cr {
+		if !(record.Name == r.Name && record.Type == r.Type) {
+			rr = append(rr, record)
+		}
+	}
+	// Also append the new one
+	rr = append(rr, r)
+	// Set the records
+	v.SetDNSRecords(domain, rr)
+}
+
+func (v Vimexx) RemoveDNSRecord(domain string, name string, t string) {
+	// Get the current records
+	cr := v.GetDNSRecords(domain)
+	// Copy all records which are not equal to the one which is to be removed
+	rr := []DNSRecord{}
+	for _, record := range cr {
+		if !(record.Name == name && record.Type == t) {
+			rr = append(rr, record)
+		}
+	}
+	// Set the records
+	v.SetDNSRecords(domain, rr)
 }

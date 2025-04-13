@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/go-acme/lego/v4/challenge"
@@ -64,9 +63,6 @@ func NewDefaultConfig() *Config {
 type DNSProvider struct {
 	config *Config
 	client *internal.Vimexx
-
-	originalRecords   []internal.DNSRecord
-	originalRecordsMu sync.Mutex
 }
 
 // NewDNSProvider returns a DNSProvider instance configured for Vimexx.
@@ -111,9 +107,8 @@ func NewDNSProviderConfig(config *Config) (*DNSProvider, error) {
 	client.Login()
 
 	return &DNSProvider{
-		config:          config,
-		client:          client,
-		originalRecords: []internal.DNSRecord{},
+		config: config,
+		client: client,
 	}, nil
 }
 
@@ -126,19 +121,13 @@ func (d *DNSProvider) Timeout() (timeout, interval time.Duration) {
 // Present creates a TXT record using the specified parameters.
 func (d *DNSProvider) Present(domain, token, keyAuth string) error {
 	info := dns01.GetChallengeInfo(domain, keyAuth)
-	d.originalRecords = d.client.GetDNS(domain)
-	newRecords := []internal.DNSRecord{}
-	newRecords = append(newRecords, d.originalRecords...)
-	newRecords = append(newRecords, internal.DNSRecord{Name: info.EffectiveFQDN, Type: "TXT", Content: info.Value, TTL: d.config.TTL})
-	d.client.SetDNS(domain, newRecords)
-
+	d.client.SetDNSRecord(domain, internal.DNSRecord{Name: info.EffectiveFQDN, Type: "TXT", Content: info.Value, TTL: d.config.TTL})
 	return nil
 }
 
 // CleanUp removes the TXT record matching the specified parameters.
 func (d *DNSProvider) CleanUp(domain, token, keyAuth string) error {
-	//info := dns01.GetChallengeInfo(domain, keyAuth)
-
-	d.client.SetDNS(domain, d.originalRecords)
+	info := dns01.GetChallengeInfo(domain, keyAuth)
+	d.client.RemoveDNSRecord(domain, info.EffectiveFQDN, "TXT")
 	return nil
 }
